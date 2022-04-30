@@ -104,6 +104,7 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
+extern uint64 sys_trace(void);
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -127,7 +128,37 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_trace]   sys_trace,
 };
+
+char*
+syscall_name(int num) {
+    switch (num) {
+        case SYS_fork: return "fork";
+        case SYS_exit: return "exit";
+        case SYS_wait: return "wait";
+        case SYS_pipe: return "pipe";
+        case SYS_read: return "read";
+        case SYS_kill: return "kill";
+        case SYS_exec: return "exec";
+        case SYS_fstat: return "fstat";
+        case SYS_chdir: return "chdir";
+        case SYS_dup: return "dup";
+        case SYS_getpid: return "getpid";
+        case SYS_sbrk: return "sbrk";
+        case SYS_sleep: return "sleep";
+        case SYS_uptime: return "uptime";
+        case SYS_open: return "open";
+        case SYS_write: return "write";
+        case SYS_mknod: return "mknod";
+        case SYS_unlink: return "unlink";
+        case SYS_link: return "link";
+        case SYS_mkdir: return "mkdir";
+        case SYS_close: return "close";
+        case SYS_trace: return "trace";
+    }
+    return "unknown sys call";
+}
 
 void
 syscall(void)
@@ -137,7 +168,18 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    p->trapframe->a0 = syscalls[num]();
+      p->trapframe->a0 = syscalls[num]();
+
+      // todo print the trace output
+      //    1. check the mask enable
+      //    2. get the process id
+      //    3. get the system call name
+      //    4. get the system call return value
+      //    5. print the trace
+      if (p->mask > 0 && ((p->mask >> num) & 1)) {
+          printf("%d: syscall %s -> %d\n",
+                 p->pid, syscall_name(num), p->trapframe->a0);
+      }
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);
