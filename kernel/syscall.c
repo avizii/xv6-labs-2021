@@ -105,60 +105,59 @@ extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
+extern uint64 sys_sysinfo(void);
 
 static uint64 (*syscalls[])(void) = {
-[SYS_fork]    sys_fork,
-[SYS_exit]    sys_exit,
-[SYS_wait]    sys_wait,
-[SYS_pipe]    sys_pipe,
-[SYS_read]    sys_read,
-[SYS_kill]    sys_kill,
-[SYS_exec]    sys_exec,
-[SYS_fstat]   sys_fstat,
-[SYS_chdir]   sys_chdir,
-[SYS_dup]     sys_dup,
-[SYS_getpid]  sys_getpid,
-[SYS_sbrk]    sys_sbrk,
-[SYS_sleep]   sys_sleep,
-[SYS_uptime]  sys_uptime,
-[SYS_open]    sys_open,
-[SYS_write]   sys_write,
-[SYS_mknod]   sys_mknod,
-[SYS_unlink]  sys_unlink,
-[SYS_link]    sys_link,
-[SYS_mkdir]   sys_mkdir,
-[SYS_close]   sys_close,
-[SYS_trace]   sys_trace,
+[SYS_fork]      sys_fork,
+[SYS_exit]      sys_exit,
+[SYS_wait]      sys_wait,
+[SYS_pipe]      sys_pipe,
+[SYS_read]      sys_read,
+[SYS_kill]      sys_kill,
+[SYS_exec]      sys_exec,
+[SYS_fstat]     sys_fstat,
+[SYS_chdir]     sys_chdir,
+[SYS_dup]       sys_dup,
+[SYS_getpid]    sys_getpid,
+[SYS_sbrk]      sys_sbrk,
+[SYS_sleep]     sys_sleep,
+[SYS_uptime]    sys_uptime,
+[SYS_open]      sys_open,
+[SYS_write]     sys_write,
+[SYS_mknod]     sys_mknod,
+[SYS_unlink]    sys_unlink,
+[SYS_link]      sys_link,
+[SYS_mkdir]     sys_mkdir,
+[SYS_close]     sys_close,
+[SYS_trace]     sys_trace,
+[SYS_sysinfo]   sys_sysinfo,
 };
 
-char*
-syscall_name(int num) {
-    switch (num) {
-        case SYS_fork: return "fork";
-        case SYS_exit: return "exit";
-        case SYS_wait: return "wait";
-        case SYS_pipe: return "pipe";
-        case SYS_read: return "read";
-        case SYS_kill: return "kill";
-        case SYS_exec: return "exec";
-        case SYS_fstat: return "fstat";
-        case SYS_chdir: return "chdir";
-        case SYS_dup: return "dup";
-        case SYS_getpid: return "getpid";
-        case SYS_sbrk: return "sbrk";
-        case SYS_sleep: return "sleep";
-        case SYS_uptime: return "uptime";
-        case SYS_open: return "open";
-        case SYS_write: return "write";
-        case SYS_mknod: return "mknod";
-        case SYS_unlink: return "unlink";
-        case SYS_link: return "link";
-        case SYS_mkdir: return "mkdir";
-        case SYS_close: return "close";
-        case SYS_trace: return "trace";
-    }
-    return "unknown sys call";
-}
+static char *syscall_name[] = {
+[SYS_fork]     "fork",
+[SYS_exit]     "exit",
+[SYS_wait]     "wait",
+[SYS_pipe]     "pipe",
+[SYS_read]     "read",
+[SYS_kill]     "kill",
+[SYS_exec]     "exec",
+[SYS_fstat]    "fstat",
+[SYS_chdir]    "chdir",
+[SYS_dup]      "dup",
+[SYS_getpid]   "getpid",
+[SYS_sbrk]     "sbrk",
+[SYS_sleep]    "sleep",
+[SYS_uptime]   "uptime",
+[SYS_open]     "open",
+[SYS_write]    "write",
+[SYS_mknod]    "mknod",
+[SYS_unlink]   "unlink",
+[SYS_link]     "link",
+[SYS_mkdir]    "mkdir",
+[SYS_close]    "close",
+[SYS_trace]    "trace",
+[SYS_sysinfo]  "sysinfo",
+};
 
 void
 syscall(void)
@@ -178,7 +177,7 @@ syscall(void)
       //    5. print the trace
       if (p->mask > 0 && ((p->mask >> num) & 1)) {
           printf("%d: syscall %s -> %d\n",
-                 p->pid, syscall_name(num), p->trapframe->a0);
+                 p->pid, syscall_name[num], p->trapframe->a0);
       }
   } else {
     printf("%d %s: unknown sys call %d\n",
